@@ -1,65 +1,75 @@
 # OTIF Engine
 
-An order fulfillment tracking system that calculates and monitors On-Time In-Full (OTIF) metrics for supply chain operations. Integrates data from multiple sources (Redshift, SharePoint, AWS) to provide unified visibility into delivery performance.
+A Python-based supply chain data consolidation and OTIF (On-Time In-Full) stage calculation engine. Ingests order, inventory, and shipment data from Redshift, applies status mappings and business rules from SharePoint, and computes fulfillment metrics.
 
 ## Features
 
-- **Multi-source data integration**: Consolidates data from Redshift databases, SharePoint, CSV files, and AWS Parameter Store
-- **Flexible data fetching**: Supports both tabular data and Excel mappings with multi-threaded ingestion
-- **Status computation**: Calculates OTIF metrics and delivery status tracking
-- **Automated scheduling**: Daily data refreshes with intelligent date handling (skips weekends)
-- **Secure credential management**: AWS Parameter Store integration for credential storage
+- **Multi-source data integration**: Aggregates data from Redshift, SharePoint, and AWS Parameter Store
+- **Multithreaded ingestion**: Efficiently fetches large datasets from Redshift using ThreadPoolExecutor
+- **Flexible mappings**: Status, blocker, payment term, and vendor mappings loaded from SharePoint
+- **Modular architecture**: Separate modules for data fetching, formatting, and transformation
+- **Local testing setup**: Comprehensive local data fixtures for development and testing
 
 ## Tech Stack
 
-- **Data Processing**: Python, pandas, numpy
-- **Database**: Amazon Redshift
-- **Cloud**: AWS (S3, Parameter Store, boto3)
-- **SharePoint**: Microsoft SharePoint with certificate-based authentication
-- **Excel**: openpyxl, xlsxwriter
-- **Development**: Jupyter notebooks for analysis and testing
+- **Python 3.x**
+- **Data Processing**: pandas, numpy
+- **Database**: redshift_connector (AWS Redshift)
+- **Cloud**: boto3 (AWS), msal (Microsoft authentication)
+- **Excel/Spreadsheets**: openpyxl, xlsxwriter, xlwings
+- **SharePoint Integration**: requests, msal
 
 ## Setup
 
-1. **Install dependencies**:
+1. Clone the repository
+2. Create a virtual environment:
    ```bash
-   pip install pandas numpy openpyxl xlsxwriter redshift-connector boto3 msal requests
+   python3 -m venv .venv
+   source .venv/bin/activate
    ```
-
-2. **Configure credentials**:
-   - Store AWS credentials in AWS Parameter Store (recommended) or environment variables
-   - Avoid hardcoding credentials in version control
-   - Use `creds.txt` format only for local development (excluded from git)
-
-3. **Configure data sources**:
-   - Update SharePoint URLs and API settings
-   - Configure Redshift connection parameters
-   - Map local CSV files in `Testing Setup/local_data_dnd/`
+3. Install dependencies:
+   ```bash
+   pip install pandas numpy redshift-connector openpyxl xlsxwriter boto3 msal requests xlwings
+   ```
+4. Configure credentials:
+   - Set up `creds.txt` with Redshift and AWS credentials (excluded from version control)
+   - Alternatively, use AWS Parameter Store for secure credential management
+5. Update SharePoint URLs and paths in configuration
 
 ## Usage
 
 ```python
-from Testing_Setup.ingestion_tables_multithreading import fetch_from_redshift
-from Testing_Setup.ingestion_excels import main
 from src.data_fetcher import fetch_all_data
 
-# Fetch data from configured sources
-dfs_tables = {...}  # Load from Redshift
-dfs_excels = {...}  # Load from SharePoint/local Excel files
+# Fetch consolidated data
+consolidated_df = fetch_all_data(dfs_tables, dfs_excels, debug=True)
 
-# Consolidate all data
-consolidated_data = fetch_all_data(dfs_tables, dfs_excels)
+# Process with transformers and status computation
+# See src/data_transformers.py and src/status_computation.py
 ```
 
 ## Project Structure
 
-- `src/` - Core modules (data fetcher, formatter, transformers, status computation)
-- `Testing Setup/` - Data ingestion scripts and test datasets
-- `configs/` - Configuration files (status rules, mappings)
-- `main.py` - Entry point for OTIF calculation
+```
+├── src/
+│   ├── data_fetcher.py           # Core data aggregation
+│   ├── data_formatter.py         # Data formatting utilities
+│   ├── data_transformers.py      # Business logic transformations
+│   ├── status_computation.py     # OTIF stage calculations
+│   └── utils/
+│       └── expression_evaluator.py
+├── Testing Setup/               # Test data and ingestion scripts
+│   ├── ingestion_tables_multithreading.py
+│   ├── ingestion_excels.py
+│   ├── sharepoint.py
+│   └── local_data_dnd/          # Local test fixtures
+├── configs/
+│   └── status_rules.json        # Status mapping rules
+└── main.py                       # Entry point
+```
 
 ## Notes
 
-- Large CSV test datasets are excluded from version control
-- Credentials should be managed via AWS Parameter Store in production
-- Multi-threading is used for efficient data fetching from large sources
+- Large CSV files and test data are excluded from version control
+- Credentials and secrets are never committed
+- Use environment variables or AWS Parameter Store for production credentials
