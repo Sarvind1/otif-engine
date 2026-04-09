@@ -42,45 +42,53 @@ venv.bak/
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
+.sublime-*
+*.sublime-project
+*.sublime-workspace
 
 # Jupyter
 .ipynb_checkpoints/
-*.ipynb
+*.ipynb_checkpoints
 
-# Test/Data files
-Testing Setup/consolidated_data.csv
-Testing Setup/local_data_dnd/tables/*.csv
-Testing Setup/local_data_dnd/excels/*.csv
-project_plan.csv
-
-# Credentials (IMPORTANT: Never commit)
-creds.txt
-*.key
-*.pem
-secrets/
-.secrets/
-AWS credentials
-sharepoint credentials
-
-# OS files
+# macOS and Windows
 .DS_Store
 Thumbs.db
 .AppleDouble
 .LSOverride
 
-# Cache
+# Test and Data Files
+Testing Setup/consolidated_data.csv
+Testing Setup/local_data_dnd/tables/*.csv
+Testing Setup/local_data_dnd/excels/*.csv
+project_plan.csv
+
+# Credentials and Secrets (CRITICAL: Never commit)
+creds.txt
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+.secrets/
+AWS_credentials
+sharepoint_credentials
+.env.local
+.env.production
+
+# Cache and Logs
 *.cache
 .pytest_cache/
 .mypy_cache/
-
-# Logs
 *.log
 logs/
-
-# Temporary files
 *.tmp
 *.temp
+
+# Excel temporary files
 ~$*.xlsx
 .~lock.*
+
+# Node modules (if applicable)
+node_modules/
+npm-debug.log
+yarn-error.log
